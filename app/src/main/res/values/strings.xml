@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pele Demo</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="settings">Settings</string>
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Main screen -->
+    <string name="clock_description">Clock, %1$s</string>
+    <string name="amount">Amount</string>
+    <string name="error_amount_required">Amount is required</string>
+    <string name="error_amount_invalid">Enter a valid amount</string>
+    <string name="error_amount_positive">Amount must be greater than zero</string>
+    <string name="installments">Installments</string>
+    <string name="installments_count">Payments</string>
+    <string name="currency">Currency</string>
+    <string name="signature">Signature</string>
+
+    <!-- Settings screen -->
+    <string name="allow_installments">Allow installments</string>
+    <string name="allow_currency">Allow currency</string>
+    <string name="allow_signature">Allow signature</string>
+
+    <!-- Signature screen -->
+    <string name="signature_pad_description">Signature pad. Draw your signature with your finger.</string>
+    <string name="signature_image_description">Customer signature</string>
+    <string name="clear">Clear</string>
+
+    <!-- Receipt screen -->
+    <string name="receipt">Receipt</string>
+    <string name="finish">Finish</string>
+    <string name="convert">Convert</string>
+
+    <!-- Conversion screen -->
+    <string name="conversion_title">Currency Conversion</string>
+    <string name="conversion_header">%1$s %2$s converts to:</string>
+    <string name="conversion_rate">1 %1$s = %2$s %3$s</string>
+    <string name="conversion_error">Could not load exchange rates. Check your connection and try again.</string>
+    <string name="retry">Retry</string>
+</resources>
