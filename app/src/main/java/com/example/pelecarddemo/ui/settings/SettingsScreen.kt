@@ -1,6 +1,7 @@
 package com.example.pelecarddemo.ui.settings
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -72,12 +74,16 @@ fun SettingsScreen(
     }
 }
 
+/** How much bigger a switch row's label grows once it is turned on. */
+private const val LABEL_SCALE_ON = 1.1f
+
 @Composable
 private fun SettingSwitchRow(
     @StringRes label: Int,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val labelScale by animateFloatAsState(if (checked) LABEL_SCALE_ON else 1f, label = "labelScale")
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,7 +91,11 @@ private fun SettingSwitchRow(
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = stringResource(label), modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(label),
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = MaterialTheme.typography.bodyLarge.fontSize * labelScale),
+        )
         Switch(checked = checked, onCheckedChange = null)
     }
 }

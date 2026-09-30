@@ -1,6 +1,7 @@
 package com.example.pelecarddemo.ui.main
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -321,6 +322,9 @@ private fun AmountField(
     )
 }
 
+/** How much bigger a switch row's label grows once it is turned on. */
+private const val LABEL_SCALE_ON = 1.1f
+
 /** A whole row toggles the switch, which makes a much larger touch target and reads well in TalkBack. */
 @Composable
 private fun LabeledSwitch(
@@ -329,13 +333,18 @@ private fun LabeledSwitch(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val labelScale by animateFloatAsState(if (checked) LABEL_SCALE_ON else 1f, label = "labelScale")
     Row(
         modifier = modifier
             .heightIn(min = 48.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = MaterialTheme.typography.bodyLarge.fontSize * labelScale),
+        )
         Switch(
             checked = checked,
             onCheckedChange = null,
