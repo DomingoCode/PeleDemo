@@ -20,7 +20,7 @@ access for that screen only; the core flow works fully offline.
 
 - **Main screen**: settings button, analog clock (ticks every second), amount field (large Fraunces digits, currency symbol
   as a leading icon), installments switch + 1–12 picker (disabled while the switch is off, with a "N × {symbol}{amount} per
-  month" line once it's on), USD / ILS as two pill chips, signature switch, Submit and Cancel.
+  month" line once it's on), a USD / ILS segmented toggle right under the installments row, signature switch, Submit and Cancel.
 - **Settings screen**: three switches (installments / currency / signature) that show or hide the matching option on the main screen; back button in the top bar.
 - **Validation**: the amount is required and must be greater than zero. Input is filtered while typing (digits and one separator, max 2 decimals), errors are shown under the field and cleared on the next edit.
 - **Cancel** clears the current transaction and restores the initial state of the main screen.

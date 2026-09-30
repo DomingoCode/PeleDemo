@@ -369,7 +369,6 @@ private fun InstallmentsPicker(
             readOnly = true,
             enabled = enabled,
             singleLine = true,
-            label = { Text(stringResource(R.string.installments_count)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             shape = RoundedCornerShape(14.dp),
         )
