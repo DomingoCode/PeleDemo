@@ -3,9 +3,9 @@ package com.example.pelecarddemo.domain
 import java.math.BigDecimal
 import java.util.Locale
 
-enum class Currency(val code: String) {
-    USD("USD"),
-    ILS("ILS"),
+enum class Currency(val code: String, val symbol: String) {
+    USD("USD", "$"),
+    ILS("ILS", "₪"),
 }
 
 /** Which optional inputs are shown on the main screen. Edited on the Settings screen. */
@@ -38,11 +38,21 @@ data class Transaction(
     val installments: Int?,
     val currency: Currency?,
     val signature: Signature?,
+    val receiptNumber: Int,
+    val timestampMillis: Long,
 )
 
 data class ClockTime(val hour: Int, val minute: Int, val second: Int) {
     fun formatted(): String = String.format(Locale.US, "%02d:%02d:%02d", hour, minute, second)
 }
+
+/** Pure formatting of a receipt timestamp; deterministic for a given [millis], so it is easy to unit test. */
+fun formatReceiptDate(millis: Long): String =
+    java.text.SimpleDateFormat("MMM d, HH:mm", Locale.US).format(java.util.Date(millis))
+
+/** Time-only formatting, e.g. for "updated 14:32" captions. */
+fun formatTime(millis: Long): String =
+    java.text.SimpleDateFormat("HH:mm", Locale.US).format(java.util.Date(millis))
 
 enum class AmountError {
     REQUIRED,

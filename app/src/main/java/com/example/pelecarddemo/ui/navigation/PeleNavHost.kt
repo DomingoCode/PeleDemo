@@ -94,6 +94,7 @@ fun PeleNavHost(navController: NavHostController = rememberNavController()) {
                     repository = exchangeRateRepository,
                     amount = current.amount,
                     baseCurrencyCode = (current.currency ?: PaymentRules.DEFAULT_CURRENCY).code,
+                    receiptNumber = current.receiptNumber,
                     onBack = { navController.popBackStack() },
                 )
             }

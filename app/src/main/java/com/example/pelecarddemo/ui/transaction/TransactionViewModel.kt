@@ -12,6 +12,7 @@ import com.example.pelecarddemo.domain.PaymentRules
 import com.example.pelecarddemo.domain.Signature
 import com.example.pelecarddemo.domain.SignaturePoint
 import com.example.pelecarddemo.domain.Transaction
+import java.math.BigDecimal
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,8 @@ data class MainUiState(
     val showInstallments: Boolean,
     val installmentsOn: Boolean,
     val installments: Int,
+    /** The per-installment amount, only when there is something meaningful to break down. */
+    val installmentAmount: BigDecimal?,
     val showCurrency: Boolean,
     val currency: Currency,
     val showSignature: Boolean,
@@ -62,6 +65,7 @@ class TransactionViewModel(
     private val strokes = MutableStateFlow<List<List<SignaturePoint>>>(emptyList())
     private val _receipt = MutableStateFlow<Transaction?>(null)
     private val _events = Channel<TransactionEvent>(Channel.BUFFERED)
+    private var nextReceiptNumber = 1
 
     val events: Flow<TransactionEvent> = _events.receiveAsFlow()
 
@@ -175,7 +179,14 @@ class TransactionViewModel(
         settings: AppSettings,
         signature: Signature?,
     ) {
-        _receipt.value = PaymentRules.buildTransaction(amount.value, currentForm, settings, signature)
+        _receipt.value = PaymentRules.buildTransaction(
+            amount = amount.value,
+            form = currentForm,
+            settings = settings,
+            signature = signature,
+            receiptNumber = nextReceiptNumber++,
+            timestampMillis = System.currentTimeMillis(),
+        )
         _events.trySend(TransactionEvent.NavigateToReceipt)
     }
 
@@ -196,8 +207,16 @@ private fun toMainState(form: PaymentForm, error: AmountError?, settings: AppSet
     showInstallments = settings.installmentsAllowed,
     installmentsOn = form.installmentsOn,
     installments = form.installments,
+    installmentAmount = installmentAmountOrNull(form),
     showCurrency = settings.currencyAllowed,
     currency = form.currency,
     showSignature = settings.signatureAllowed,
     signatureOn = form.signatureOn,
 )
+
+/** Null unless installments are on with more than one payment and the amount typed so far is valid. */
+private fun installmentAmountOrNull(form: PaymentForm): BigDecimal? {
+    if (!form.installmentsOn || form.installments <= 1) return null
+    val amount = (PaymentRules.validateAmount(form.amountInput) as? AmountResult.Valid)?.value ?: return null
+    return PaymentRules.installmentAmount(amount, form.installments)
+}

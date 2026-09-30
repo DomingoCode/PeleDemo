@@ -1,33 +1,41 @@
 package com.example.pelecarddemo.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
-private val LightColors = lightColorScheme(
-    primary = Color(0xFF1F2A5A),
-    onPrimary = Color.White,
-    secondary = Color(0xFFB3245A),
-    onSecondary = Color.White,
+private val BrandLightColors = lightColorScheme(
+    primary = BrandGreen,
+    onPrimary = BrandPaper,
+    primaryContainer = BrandGreenContainer,
+    onPrimaryContainer = BrandInk,
+    secondary = BrandGreen,
+    onSecondary = BrandPaper,
+    secondaryContainer = BrandGreenContainer,
+    onSecondaryContainer = BrandInk,
+    background = BrandSand,
+    onBackground = BrandInk,
+    surface = BrandPaper,
+    onSurface = BrandInk,
+    surfaceVariant = BrandSandDark,
+    onSurfaceVariant = BrandInkSoft,
+    outline = BrandOutline,
+    outlineVariant = BrandDivider,
+    error = BrandStampRed,
+    onError = BrandPaper,
+    errorContainer = BrandErrorContainer,
+    onErrorContainer = BrandStampRed,
 )
 
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFFB8C3FF),
-    onPrimary = Color(0xFF0F1A4A),
-    secondary = Color(0xFFFFB1C8),
-    onSecondary = Color(0xFF5E0A2D),
-)
-
+/**
+ * Brand "Receipt" redesign theme (see design/DESIGN.md). Dynamic color is never used, and dark
+ * theme is out of scope for now, so the same light brand palette applies in both system modes.
+ */
 @Composable
-fun PeleDemoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
+fun PeleDemoTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
+        colorScheme = BrandLightColors,
+        typography = PeleDemoTypography,
         content = content,
     )
 }

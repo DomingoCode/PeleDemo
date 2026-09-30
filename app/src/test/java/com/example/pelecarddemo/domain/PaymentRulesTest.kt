@@ -98,6 +98,16 @@ class PaymentRulesTest {
 
     // endregion
 
+    // region installmentAmount
+
+    @Test
+    fun installmentAmount_dividesAndRoundsHalfUp() {
+        assertEquals(BigDecimal("413.33"), PaymentRules.installmentAmount(BigDecimal("1240"), 3))
+        assertEquals(BigDecimal("620.00"), PaymentRules.installmentAmount(BigDecimal("1240"), 2))
+    }
+
+    // endregion
+
     // region buildTransaction
 
     @Test
@@ -105,12 +115,16 @@ class PaymentRulesTest {
         val signature = Signature(listOf(listOf(SignaturePoint(0f, 0f), SignaturePoint(1f, 1f))))
         val form = PaymentForm(installmentsOn = true, installments = 12, currency = Currency.USD, signatureOn = true)
 
-        val transaction = PaymentRules.buildTransaction(BigDecimal("200"), form, AppSettings(), signature)
+        val transaction = PaymentRules.buildTransaction(
+            BigDecimal("200"), form, AppSettings(), signature, receiptNumber = 7, timestampMillis = 1_000L,
+        )
 
         assertEquals(BigDecimal("200.00"), transaction.amount)
         assertEquals(12, transaction.installments)
         assertEquals(Currency.USD, transaction.currency)
         assertEquals(signature, transaction.signature)
+        assertEquals(7, transaction.receiptNumber)
+        assertEquals(1_000L, transaction.timestampMillis)
     }
 
     @Test
@@ -118,7 +132,9 @@ class PaymentRulesTest {
         val form = PaymentForm(installmentsOn = false, currency = Currency.ILS, signatureOn = true)
         val settings = AppSettings(currencyAllowed = false, signatureAllowed = false)
 
-        val transaction = PaymentRules.buildTransaction(BigDecimal("50"), form, settings, Signature(emptyList()))
+        val transaction = PaymentRules.buildTransaction(
+            BigDecimal("50"), form, settings, Signature(emptyList()), receiptNumber = 1, timestampMillis = 0L,
+        )
 
         assertNull(transaction.installments)
         assertNull(transaction.currency)

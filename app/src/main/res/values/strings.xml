@@ -9,6 +9,8 @@
     <string name="cancel">Cancel</string>
 
     <!-- Main screen -->
+    <string name="new_payment_label">New Payment</string>
+    <string name="demo_badge">Demo</string>
     <string name="clock_description">Clock, %1$s</string>
     <string name="amount">Amount</string>
     <string name="error_amount_required">Amount is required</string>
@@ -16,6 +18,7 @@
     <string name="error_amount_positive">Amount must be greater than zero</string>
     <string name="installments">Installments</string>
     <string name="installments_count">Payments</string>
+    <string name="installment_breakdown">%1$d × %2$s per month</string>
     <string name="currency">Currency</string>
     <string name="signature">Signature</string>
 
@@ -25,19 +28,31 @@
     <string name="allow_signature">Allow signature</string>
 
     <!-- Signature screen -->
+    <string name="signature_step_label">Sign · Step 2 of 3</string>
+    <string name="signature_title">Sign to confirm %1$s</string>
+    <string name="signature_hint">Draw with your finger</string>
+    <string name="signature_pen_label">Pen: Ink</string>
     <string name="signature_pad_description">Signature pad. Draw your signature with your finger.</string>
     <string name="signature_image_description">Customer signature</string>
     <string name="clear">Clear</string>
 
     <!-- Receipt screen -->
-    <string name="receipt">Receipt</string>
+    <string name="receipt_printed_label">Receipt printed</string>
+    <string name="receipt_number_label">Receipt #%1$04d</string>
+    <string name="date_label">Date</string>
     <string name="finish">Finish</string>
     <string name="convert">Convert</string>
 
     <!-- Conversion screen -->
-    <string name="conversion_title">Currency Conversion</string>
-    <string name="conversion_header">%1$s %2$s converts to:</string>
+    <string name="conversion_title">Conversion</string>
+    <string name="conversion_receipt_line">Receipt #%1$04d · base %2$s</string>
+    <string name="conversion_column_currency">Currency · Rate</string>
+    <string name="conversion_column_amount">Amount</string>
+    <string name="conversion_loading">Loading rates…</string>
     <string name="conversion_rate">1 %1$s = %2$s %3$s</string>
-    <string name="conversion_error">Could not load exchange rates. Check your connection and try again.</string>
+    <string name="conversion_footer">Live rates · %1$s · updated %2$s</string>
+    <string name="conversion_error_title">Couldn\'t load rates</string>
+    <string name="conversion_error_body">Check your connection and try again. Your receipt is saved.</string>
+    <string name="back_to_receipt">Back to receipt</string>
     <string name="retry">Retry</string>
 </resources>

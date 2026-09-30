@@ -78,16 +78,24 @@ object PaymentRules {
         return result
     }
 
+    /** The amount of a single installment, rounded the same way as the total. */
+    fun installmentAmount(total: BigDecimal, installments: Int): BigDecimal =
+        total.divide(BigDecimal(installments), MAX_DECIMAL_DIGITS, RoundingMode.HALF_UP)
+
     /** Builds the receipt data, including only what is relevant to this transaction. */
     fun buildTransaction(
         amount: BigDecimal,
         form: PaymentForm,
         settings: AppSettings,
         signature: Signature?,
+        receiptNumber: Int,
+        timestampMillis: Long,
     ): Transaction = Transaction(
         amount = amount.setScale(MAX_DECIMAL_DIGITS, RoundingMode.HALF_UP),
         installments = if (settings.installmentsAllowed && form.installmentsOn) form.installments else null,
         currency = if (settings.currencyAllowed) form.currency else null,
         signature = if (requiresSignature(form, settings)) signature else null,
+        receiptNumber = receiptNumber,
+        timestampMillis = timestampMillis,
     )
 }

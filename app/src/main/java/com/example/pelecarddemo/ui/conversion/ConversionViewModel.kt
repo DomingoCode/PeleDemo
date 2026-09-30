@@ -18,10 +18,15 @@ sealed interface ConversionUiState {
         val amount: BigDecimal,
         val baseCurrencyCode: String,
         val rates: List<ConversionRate>,
+        val fetchedAtMillis: Long,
     ) : ConversionUiState
 }
 
-/** Owns the Convert screen's network call. Scoped to that screen: created fresh each time it is opened. */
+/**
+ * Owns the Convert screen's network call. Scoped to the Conversion back-stack entry (via
+ * `viewModel()` in [ConversionRoute]), so it is created once per visit to the screen and survives
+ * rotation: [load] only runs again if the caller explicitly asks for a [retry].
+ */
 class ConversionViewModel(
     private val repository: ExchangeRateRepository,
     private val amount: BigDecimal,
@@ -46,6 +51,7 @@ class ConversionViewModel(
                         amount = amount,
                         baseCurrencyCode = baseCurrencyCode,
                         rates = ConversionRules.buildConversionRates(amount, baseCurrencyCode, rates),
+                        fetchedAtMillis = System.currentTimeMillis(),
                     )
                 }
                 .onFailure { _state.value = ConversionUiState.Error }

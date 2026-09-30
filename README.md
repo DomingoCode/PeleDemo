@@ -2,6 +2,8 @@
 
 A small demo payment app (no real payments): enter an amount, optionally choose installments, currency and a signature, and get a receipt.
 Built with Kotlin, Jetpack Compose (Material 3), Compose Navigation and ViewModels. `minSdk 24` (Android 7.0).
+Visuals follow the "Receipt" redesign handoff (brand palette, Manrope/Fraunces typography, custom launcher icon) — see
+[Visual design](#visual-design-receipt-redesign) below.
 
 ## Setup
 
@@ -10,34 +12,50 @@ Built with Kotlin, Jetpack Compose (Material 3), Compose Navigation and ViewMode
 2. Run the `app` configuration on a device/emulator with Android 7.0+.
 3. Unit tests: `./gradlew test`
 
-No API key or network access is needed for the core flow.
+No API key is needed. The Convert screen (bonus) calls the free, key-less
+[open.er-api.com](https://www.exchangerate-api.com/docs/free) exchange-rate API, so the device/emulator needs internet
+access for that screen only; the core flow works fully offline.
 
 ## What is completed
 
-- **Main screen**: settings button, analog clock (ticks every second), amount field, installments switch + 1–12 picker
-  (disabled while the switch is off), USD / ILS toggle, signature switch, Submit and Cancel.
+- **Main screen**: settings button, analog clock (ticks every second), amount field (large Fraunces digits, currency symbol
+  as a leading icon), installments switch + 1–12 picker (disabled while the switch is off, with a "N × {symbol}{amount} per
+  month" line once it's on), USD / ILS as two pill chips, signature switch, Submit and Cancel.
 - **Settings screen**: three switches (installments / currency / signature) that show or hide the matching option on the main screen; back button in the top bar.
 - **Validation**: the amount is required and must be greater than zero. Input is filtered while typing (digits and one separator, max 2 decimals), errors are shown under the field and cleared on the next edit.
 - **Cancel** clears the current transaction and restores the initial state of the main screen.
-- **Signature screen**: drawing canvas, Submit (disabled until something is drawn), Cancel (back to the main screen with the entered data intact) and a Clear button.
-- **Receipt screen**: amount (always), installments / currency / signature only when relevant to the transaction. Finish (and system Back) returns to the main screen and starts a new transaction.
-- Rotation-safe (state lives in ViewModels) and edge-to-edge, light/dark theme, accessibility labels for the clock, signature and switch rows.
-- Unit tests for the business rules and for the transaction ViewModel.
+- **Signature screen**: dashed-border pad, Submit (disabled until something is drawn), Cancel (back to the main screen with the entered data intact) and a Clear button.
+- **Receipt screen**: amount (always), installments / currency / signature only when relevant to the transaction, plus a
+  receipt number and date. Finish (and system Back) returns to the main screen and starts a new transaction.
+- Rotation-safe (state lives in ViewModels) and edge-to-edge, accessibility labels for the clock, signature and switch rows.
+- **Bonus: currency conversion.** A Convert button on the Receipt screen opens a conversion screen that fetches live rates
+  for the transaction's base currency (or ILS if the currency option is hidden) and shows a fixed set of well-known target
+  currencies (USD, EUR, GBP, JPY, INR, ILS, CAD, AUD, CHF, CNY, minus the base — always ≥5 left), each with its rate and the
+  converted amount. Loading spinner (with skeleton rows) while fetching, a retryable error state on failure (with a "Back to
+  receipt" escape hatch), and Back (arrow, button or system Back) always returns to the same Receipt screen without losing
+  the transaction or re-fetching already-loaded rates on rotation.
+- **Bonus: visual design.** The "Receipt" redesign — brand palette, Manrope/Fraunces typography, adaptive launcher icon,
+  pill buttons, and a custom torn-paper receipt card. Details in [Visual design](#visual-design-receipt-redesign).
+- Unit tests for the business rules, the transaction ViewModel, the conversion rules/ViewModel and the date formatting.
 
 ## What remains
 
-- **Bonus: currency conversion** (Convert button, conversion screen, exchange-rate API, loading/success/error/retry states) – not implemented yet; planned as a separate step after the core flow.
-- Bonus: visual polish beyond the Material 3 defaults.
 - Screenshots / screen recording.
 
 ## Architecture (MVVM, kept simple)
 
 ```
 domain/   Pure Kotlin: models + PaymentRules (validation, input filtering, building the receipt)
+          + ConversionRules (turns raw rates into per-currency amounts, no network/Compose)
+          + formatReceiptDate/formatTime (pure timestamp formatting)
 data/     SettingsRepository (in-memory StateFlow), ClockSource (Flow of the current time)
+          ExchangeRateRepository + remote/ExchangeRateApi (Retrofit) – fetches live exchange rates
 ui/       Composables + ViewModels, one package per screen
           transaction/TransactionViewModel  – Main -> Signature -> Receipt flow
           settings/SettingsViewModel, clock/ClockViewModel
+          conversion/ConversionViewModel    – Loading/Success/Error state for the Convert screen
+          theme/Color.kt, Type.kt, Theme.kt – brand palette, Manrope/Fraunces, the single light M3 scheme
+          components/ReceiptShape.kt        – the receipt card's rounded-top/torn-bottom Shape
           navigation/PeleNavHost            – the only place that knows about NavController
 ```
 
@@ -56,6 +74,37 @@ ui/       Composables + ViewModels, one package per screen
    and double taps are ignored by checking the current destination.
 2. **Signature stored as normalized strokes (0..1), not as a Bitmap.** It survives rotation, scales to any size, and the receipt simply re-draws the
    same strokes. The pad and the receipt preview use the same 2:1 aspect ratio so it looks identical.
+3. **Conversion screen has its own short-lived ViewModel, constructed inline with the amount/base currency it needs**
+   (instead of going through the shared `AppContainer` factory like the other ViewModels). It only ever needs one network
+   call for its own lifetime, so a `SavedStateHandle`/route-args setup would add ceremony without benefit; `ExchangeRateRepository`
+   is still shared from `AppContainer` and the conversion math lives in `ConversionRules`, so both stay unit-testable.
+
+## Visual design ("Receipt" redesign)
+
+A design handoff (`DESIGN.md` + mockups + brand assets) specified a visual-only refresh: same flow and functionality,
+new look. It was applied in six steps — icon, theme, then one pass per screen (Main, Signature, Receipt, Conversion) —
+building and testing after each one.
+
+- **Palette & type.** `colors_brand.xml` → `ui/theme/Color.kt` → one light `ColorScheme` (`ui/theme/Theme.kt`); dynamic
+  color is never used, and dark theme is intentionally out of scope, so the same light brand scheme applies in both
+  system modes. Manrope (400/600/700) is the default UI font; Fraunces (600, `ui/theme/Type.kt`) is applied only at
+  specific call sites — the main-screen amount, the receipt amount, the signature screen title — never as a Typography
+  default, so it can't leak into the rest of the UI by accident.
+- **Icon.** The old single-layer `drawable/ic_launcher.xml` was removed and replaced with an adaptive icon
+  (`mipmap-anydpi-v26`, with a monochrome layer for Android 13+ themed icons) plus legacy PNGs for pre-Android-8 buckets.
+- **Custom drawing.** Compose has no built-in "torn paper" shape or dashed border, so the receipt card uses a custom
+  `Shape` (`ui/components/ReceiptShape.kt`: rounded top corners, zig-zag bottom) and the signature pad uses a small
+  `Modifier.dashedBorder` extension.
+- **Deliberately skipped** (each one optional per the brief, and not requested): the custom numeric keypad on the main
+  screen (the existing validated `OutlinedTextField` does the job), the QR code on the receipt (needs a barcode
+  library), and the splash screen.
+- **Deviations from the mockups, in favor of the assignment ("assignment wins" per the brief):**
+  - The signature screen keeps **Submit** and **Cancel** — not the mockup's "Skip" / "Pay (demo)". "Skip" would let the
+    user bypass a signature the app has already determined is required for this transaction.
+  - The main screen keeps the required **Settings** button and the analog **clock** even though the "amount" mockup
+    doesn't show them.
+  - The receipt's number and date aren't required by the assignment; they were added only to match the design's
+    "RECEIPT #… / Date" rows. The number is an in-memory per-process counter (`TransactionViewModel`), not persisted.
 
 ## Assumptions
 
@@ -67,3 +116,4 @@ ui/       Composables + ViewModels, one package per screen
 - Back on the receipt behaves like Finish. Back on the signature screen behaves like Cancel.
 - The decimal separator is normalized to `.`; amounts are limited to 9 integer and 2 decimal digits.
 - After the process is killed and recreated, screens that depend on lost in-memory state (Receipt, or Signature submit without a form) return to the main screen instead of crashing.
+- Conversion targets are a fixed, hardcoded list of common currency codes (not fetched from the API), filtered to drop the base currency; the example API supports all of them, so this always yields 5–9 target currencies.
